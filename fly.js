@@ -1,4 +1,12 @@
-(function(global, undefined) {
+/*!
+ * Fly.js - JavaScript Library
+ * (c) 2013-2014 Stepan Zhevak <enet@flyjs.ru>
+ * MIT Licensed.
+ *
+ * http://flyjs.ru
+ * http://github.com/Enet/fly
+ */
+(function(window, document, undefined) {
 
     var FlyCore = {
         const: {
@@ -369,7 +377,7 @@
             },
 
             setRequestAnimationFrame: function() {
-                global.requestAnimationFrame = global.requestAnimationFrame || function(callback) {
+                window.requestAnimationFrame = window.requestAnimationFrame || function(callback) {
                     setTimeout(callback, 15);
                 };
             },
@@ -839,7 +847,7 @@
                                                     return fnStyle.getScrollDismensions(element, ss[0], ss[1]);
                                                 } else {
                                                     var result = {};
-                                                    result[ss[0].toLowerCase()] = global['page' + s + 'Offset'];
+                                                    result[ss[0].toLowerCase()] = window['page' + s + 'Offset'];
                                                     result[ss[1].toLowerCase()] = document[ss[1].toLowerCase()];
                                                     return result;
                                                 }
@@ -851,7 +859,7 @@
                                                 if (fnNodeList.isNormal(element)) {
                                                     element['scroll' + ss[0]] = parseInt(value) || 0;
                                                 } else {
-                                                    global.scrollTo(s === 'X' ? value : global.pageXOffset, s === 'Y' ? value : global.pageYOffset);
+                                                    window.scrollTo(s === 'X' ? value : window.pageXOffset, s === 'Y' ? value : window.pageYOffset);
                                                 }
                                             });
                                         }
@@ -873,8 +881,8 @@
                                                     padding: [s, '-padding' + ss[0], '-padding' + ss[1]],
                                                     content: [s]
                                                 });
-                                            } else if (element === global) {
-                                                return global['inner' + su];
+                                            } else if (element === window) {
+                                                return window['inner' + su];
                                             } else {
                                                 return document[s];
                                             }
@@ -897,8 +905,8 @@
                                                 padding: [s],
                                                 content: [s, 'padding' + ss[0], 'padding' + ss[1]]
                                             });
-                                        } else if (element === global) {
-                                            return global['inner' + su];
+                                        } else if (element === window) {
+                                            return window['inner' + su];
                                         } else {
                                             return document[s];
                                         }
@@ -912,8 +920,8 @@
                                                 padding: [s, 'border' + ss[0] + 'Width', 'border' + ss[1] + 'Width'],
                                                 content: [s, 'border' + ss[0] + 'Width', 'border' + ss[1] + 'Width', 'padding' + ss[0], 'padding' + ss[1]]
                                             });
-                                        } else if (element === global) {
-                                            return global['outer' + su];
+                                        } else if (element === window) {
+                                            return window['outer' + su];
                                         } else {
                                             return document[s];
                                         }
@@ -1150,7 +1158,7 @@
                                 var item = handlers[h],
                                     element = item.element,
                                     target = event.target;
-                                if (element === global && target === document) target = global;
+                                if (element === window && target === document) target = window;
 
                                 if (target === element || ($.isNode(element) && element.contains(target))) {
 
@@ -1180,7 +1188,7 @@
                                             }
 
                                             break;
-                                        } else if (element === global) {
+                                        } else if (element === window) {
                                             target = undefined;
                                         } else {
                                             target = target.parentNode;
@@ -1247,7 +1255,7 @@
                     return new FlyDomNode(result);
                 },
                 isNormal: function(element) {
-                    return element !== document && element !== document.documentElement && element !== global;
+                    return element !== document && element !== document.documentElement && element !== window;
                 },
                 makeDomNodeArray: function(args) {
                     if ($.isNodeList(args) || $.isArray(args) || args instanceof FlyDomNode) {
@@ -1390,12 +1398,12 @@
             style: {
                 getStyle: function(element, property) {
                     if ($.isNode(element)) {
-                        var style = global.getComputedStyle(element);
+                        var style = window.getComputedStyle(element);
                         if ((property === 'width' && style.width === 'auto') || (property === 'height' && style.height === 'auto')) {
                             style = {};
                             style[property] = element['offset' + fnCommon.capFirst(property)] + 'px';
                         }
-                    } else if (element !== global) {
+                    } else if (element !== window) {
                         return null;
                     } else {
                         var style = {};
@@ -1419,7 +1427,7 @@
                     }
                 },
                 setStyle: function(style, property, value) {
-                    if ($.isNode(style) || style === global) {
+                    if ($.isNode(style) || style === window) {
                         var element = style,
                             style = element.style;
                     }
@@ -1588,6 +1596,10 @@
                     if (prefix === '') {
                         return string;
                     } else {
+                        if (string === 'transitionEnd') {
+                            if ($.browser().trident) prefix = 'MS';
+                            if ($.browser().gecko) return 'transitionend';
+                        }
                         switch (style) {
                             case 1: if (prefix === 'moz') prefix = capFirst(prefix); break;
                             case 2: prefix = capFirst(prefix);
@@ -2227,7 +2239,7 @@
                     return this.each(function(element) {
                         var queue = element.__queue || (element.__queue = new FlyDomQueue({element: element}));
                         queue.add(options);
-                        global.requestAnimationFrame(queue.render);
+                        window.requestAnimationFrame(queue.render);
                     });
                 },
 
@@ -2280,23 +2292,23 @@
                                         case 'input':
                                             switch (child.type.toLowerCase()) {
                                                 case 'text':
-                                                    result.push(child.name + '=' + global.encodeURIComponent(child.value));
+                                                    result.push(child.name + '=' + window.encodeURIComponent(child.value));
                                                     break;
                                                 case 'radio':
-                                                    if (child.checked) result.push(child.name + '=' + global.encodeURIComponent(child.value));
+                                                    if (child.checked) result.push(child.name + '=' + window.encodeURIComponent(child.value));
                                                     break;
                                                 case 'checkbox':
                                                     if (child.checked) result.push(child.name + '=on');
                                             }
                                             break;
                                         case 'textarea':
-                                            result.push(child.name + '=' + global.encodeURIComponent(child.value));
+                                            result.push(child.name + '=' + window.encodeURIComponent(child.value));
                                             break;
                                         case 'select':
                                             var options = child.options;
                                             for (var o = 0, ol = options.length; o < ol; o++) {
                                                 var option = options[o];
-                                                if (option.selected) result.push(child.name + '=' + global.encodeURIComponent(options[o].value));
+                                                if (option.selected) result.push(child.name + '=' + window.encodeURIComponent(options[o].value));
                                             }
                                     }
                                 }
@@ -2540,7 +2552,7 @@
                         for (var t in tset) {
                             tset[t].next();
                         }
-                        global.requestAnimationFrame(this.render);
+                        window.requestAnimationFrame(this.render);
                     }
                     return this;
                 },
@@ -2675,7 +2687,7 @@
                         }
                         setTimeout($.proxy(function() {
                             fnStyle.setStyle(element, this.name, this.result = this.step(this.from, this.to, this.unit, 1));
-                        }, this), $.browser().trident * 30);
+                        }, this), !$.browser().webkit * 30);
                     }
 
                     this.state = 1;
@@ -2899,7 +2911,7 @@
 
                 proxy: function(callback, context) {
                     return function() {
-                        callback.apply(context || global, arguments);
+                        callback.apply(context || window, arguments);
                     };
                 },
 
@@ -2909,7 +2921,7 @@
                         context = hasher;
                         hasher = function(value) {return value};
                     }
-                    context = context || global;
+                    context = context || window;
                     return function() {
                         var key = hasher.apply(this, arguments);
                         return storage.hasOwnProperty(key) ? storage[key] : (storage[key] = callback.apply(context, arguments));
@@ -3039,7 +3051,7 @@
                     if (options.encoding === 'application/x-www-form-urlencoded') {
                         if (!$.isString(options.data)) {
                             for (var d in options.data) {
-                                if (options.data.hasOwnProperty(d)) params.push(d + '=' + global.encodeURIComponent(options.data[d]));
+                                if (options.data.hasOwnProperty(d)) params.push(d + '=' + window.encodeURIComponent(options.data[d]));
                             }
                             params = params.join('&');
                         } else {
@@ -3064,7 +3076,7 @@
                     }
 
                     if (options.parser === 'jsonp') {
-                        global[options.data.callback] = function() {
+                        window[options.data.callback] = function() {
                             exec = true;
                             complete(null, {url: options.url, status: 200, response: [].slice.call(arguments)});
                         };
@@ -3073,7 +3085,7 @@
                             script = document.createElement('script');
 
                         script.onload = script.onerror = function() {
-                            delete global[options.data.callback];
+                            delete window[options.data.callback];
                             !exec && complete('error', {url: options.url, status: 0, response: []});
                         };
                         script.src = options.url;
@@ -3305,7 +3317,7 @@
 
                 breakFlow: function(callback, context) {
                     setTimeout(function() {
-                        callback.apply(context || global, arguments);
+                        callback.apply(context || window, arguments);
                     }, 0);
                     return this;
                 },
@@ -3314,12 +3326,12 @@
                     if (arguments.length === 1) {
                         var re = new RegExp('(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'),
                         matches = document.cookie.match(re);
-                        return matches ? global.decodeURIComponent(matches[1]) : undefined;
+                        return matches ? window.decodeURIComponent(matches[1]) : undefined;
                     } else if (value === null || value === false) {
                         return $.cookie(name, '', {expires: -1});
                     } else {
                         if (!$.isObject(options)) options = {};
-                        value = global.encodeURIComponent(value);
+                        value = window.encodeURIComponent(value);
 
                         var expires = parseFloat(options.expires);
                         switch(options.expires) {
@@ -3345,14 +3357,14 @@
 
                 selection: function(content, dom) {
                     if (content === null || dom === null) {
-                        global.getSelection().removeAllRanges();
+                        window.getSelection().removeAllRanges();
                         return this;
                     } else if (($.isBoolean(content) && arguments.length === 1) || arguments.length === 0) {
-                        var result = global.getSelection();
+                        var result = window.getSelection();
                         return content ? result.toString() : result;
                     } else {
                         var nodes = fnNodeList.makeDomNodeArray(arguments[$.isBoolean(content) ? 1 : 0]),
-                        selection = global.getSelection();
+                        selection = window.getSelection();
 
                         selection.removeAllRanges();
                         if (content === true) {
@@ -3369,7 +3381,7 @@
                 },
 
                 isWindow: function(value) {
-                    return value === global;
+                    return value === window;
                 },
 
                 isNode: function(value) {
@@ -3386,7 +3398,7 @@
                     var toString = coreConst.protobject.toString,
                         hasOwn = coreConst.protobject.hasOwnProperty;
 
-                    if (!object || !$.isObject(object) || $.isNode(object) || object === global) return false;
+                    if (!object || !$.isObject(object) || $.isNode(object) || object === window) return false;
                     if (object.constructor && !hasOwn.call(object, 'constructor') && !hasOwn.call(object.constructor.prototype, 'isPrototypeOf')) return false;
 
                     for (var k in object) {};
@@ -3397,7 +3409,7 @@
                     if (coreConst.ready) {
                         handler.call(context);
                     } else {
-                        coreData.ready.push($.proxy(handler, context || global));
+                        coreData.ready.push($.proxy(handler, context || window));
                     }
                     return this;
                 },
@@ -3419,6 +3431,6 @@
         FlyDomTween = fnWrapper.inherit(coreConstructor.FlyDomTween),
         Fly = function(query, context) {return fnNodeList.getFlyDomNode(query, context)};
 
-    global.$ = $ = $.extend(Fly, $);
+    window.$ = $ = $.extend(Fly, $);
     Fly.__constructor();
-})(window, void(0));
+})(window, document, void(0));
